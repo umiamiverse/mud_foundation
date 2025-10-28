@@ -189,9 +189,7 @@ function update(delta,time) {
     }//end of xr
 
 }// end of update
-/*
-*  Fired on object destruction, enabling disposal of resources and proper finalization.
-*/
+
 function dispose() {
      Input.xr.stop();
 
