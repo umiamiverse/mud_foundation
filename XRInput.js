@@ -107,11 +107,8 @@ const leftControllerRay = CreateRayLine(initialOrigin, initialDirection, rayLeng
 scene.add(rightControllerRay.line);
 scene.add(leftControllerRay.line);
 
- rightControllerRay.line.frustumCulled = false;
+rightControllerRay.line.frustumCulled = false;
 leftControllerRay.line.frustumCulled = false;
-
-let rightRaycast;
-let leftRaycast;
 
 let rightControllerIndex = -1;
 let leftControllerIndex = -1; 
@@ -121,17 +118,20 @@ const controllerTrigger = 1;
 
 let testCube = scene.getObjectByName("testcube");
 
+const XR_MOVE_SPEED = 2.0;
+
 function startup() {
+
         Input.xr.start();
-  }
+
+}
 /*
 *  Fired on every frame, allowing for continuous updates and dynamic behavior.
 */
 function update(delta,time) {
 
 
-    if(Input.xr.count() > 1){
-        
+    if(Input.xr.count() > 0){
         //console.log("XR Found");
         for (let i = 0; i < Input.xr.count(); i++) {
              if (Input.xr.handedness(i) == 'left') {
@@ -140,32 +140,55 @@ function update(delta,time) {
                   rightControllerIndex = i;
          }
        }
-       console.log(rightControllerIndex + " " + Input.xr.handedness(0) + leftControllerIndex + " " + Input.xr.handedness(1));
+       
+       //console.log(rightControllerIndex + " " + Input.xr.handedness(0) + leftControllerIndex + " " + Input.xr.handedness(1));
+       
+       if (leftControllerIndex !== -1) {
+             
+             //Raycast
+             const leftRaycast = Input.xr.raycast(leftControllerIndex);
+             updateRayLine(leftControllerRay, leftRaycast);
+             
+             
+             //movement
+             const leftJoystick = Input.xr.axes(leftControllerIndex);         
+             if (leftJoystick && leftJoystick.length >= 2) {
+                  const leftJoyX = -leftJoystick[2];
+                  const leftJoyY = -leftJoystick[3];
+                  const movement = new THREE.Vector3(
+                leftJoyX * XR_MOVE_SPEED * delta,0, leftJoyY * XR_MOVE_SPEED * delta
+              );
+              console.log("leftJoyx" + leftJoyX + " leftjoyy " + leftJoyY);
+
+              movement.applyQuaternion(avatarPOV.quaternion);
+              avatarRig.position.add(movement);
+              }
+
+
+             if (Input.xr.isButtonReleased(leftControllerIndex, 1)) {
+                   console.log('Button released');
+             }
+
+    
+        }//left controller check end
        
 
+        if (rightControllerIndex !== -1) {
+             const rightRaycast = Input.xr.raycast(rightControllerIndex);
+             updateRayLine(rightControllerRay, rightRaycast);
+        
 
-       rightRaycast = Input.xr.raycast(rightControllerIndex);
-       updateRayLine(rightControllerRay, rightRaycast);
-
-        leftRaycast = Input.xr.raycast(leftControllerIndex);
-       updateRayLine(leftControllerRay, leftRaycast);
-
-      
-
-       if(RayCastHit(rightRaycast, testCube)){
-           console.log("hit test cube");
-           testCube.color = "red";
-       }else{
-           testCube.color = "green";
-       }
-
-       if (Input.xr.isButtonReleased(leftControllerIndex, 1)) {
-            console.log('Button released');
+            if(RayCastHit(rightRaycast, testCube)){
+                 console.log("hit test cube");
+                 testCube.color = "red";
+             }else{
+                 testCube.color = "green";
+             }
         }
-    
-    }
 
-}
+    }//end of xr
+
+}// end of update
 /*
 *  Fired on object destruction, enabling disposal of resources and proper finalization.
 */
@@ -174,5 +197,4 @@ function dispose() {
 
 }
 
-#pragma export(rightRaycast, leftRaycast)
 
