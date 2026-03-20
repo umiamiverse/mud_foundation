@@ -5,8 +5,8 @@
 // Get the DOM element from the renderer (usually the canvas)
 const domElement = renderer.domElement;
 
-const togglePanel = cast(scene.getObjectByName("togglePanel"), THREE.Object3D);
-const showhide = scene.getObjectByName("Canvas");
+const testCube = cast(scene.getObjectByName("testCube"), THREE.Object3D);
+const showhide = scene.getObjectByName("showHide");
 
 function CheckTarget(target){
     const { raycaster } = Input.mouse.raycast(camera);
@@ -27,35 +27,21 @@ function startup() {
 // Called every frame (e.g. 60 times per second) to update state
 function update() {
     domElement.style.cursor = 'default';  // Reset the cursor to default every frame
-    // const { raycaster } = Input.mouse.raycast(camera);
 
-    // // Intersect the ray with the target object and its children
-    // const intercept = raycaster.intersectObject(target, true);
-    // const isHovering = intercept.length > 0; // True if mouse is over any part of the target
-    if(CheckTarget(togglePanel) == true){
+       if(CheckTarget(testCube) == true ){
         showhide.visible = true;
         domElement.style.cursor = 'pointer';
-        togglePanel.color = "red";
+        testCube.color = "red";
+        if(Input.mouse.isButtonPressed(MouseButton.Left)){
+          testCube.color = "blue";  
+        }
     }else{
-        togglePanel.color = "#00FF00";
+        testCube.color = "#00FF00";
         showhide.visible = false;
     }
 
-    // if (isHovering) {
-    //     target.color = "red"; // Change target color to red on hover
-    //     domElement.style.cursor = 'pointer'; // Show pointer cursor
-    //     showhide.visible = true;
-        
-    // } else {
-    //     target.color = "#00FF00"; // Revert color when not hovering
-    //     showhide.visible = false;
-    // }
+    
 
-    // // On left mouse button release while hovering
-    // if (Input.mouse.isButtonReleased(MouseButton.Left) && isHovering) {
-    //     // Log the tag of the object that was clicked (e.g., parent's name)
-    //     console.log(intercept[0].object.tag);
-    // }
 }
 
 // Called when the system or scene is being cleaned up
